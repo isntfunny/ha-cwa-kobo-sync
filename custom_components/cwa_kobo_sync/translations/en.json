@@ -1,0 +1,26 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up CWA Kobo Sync",
+        "description": "Paste the complete Kobo Sync link from Calibre-Web Automated. Example: https://read.example.org/kobo/<token>",
+        "data": {"sync_url": "Kobo Sync link"}
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not reach CWA Kobo Sync.",
+      "invalid_auth": "CWA rejected this Kobo Sync link.",
+      "invalid_sync_url": "This is not a valid CWA Kobo Sync link."
+    }
+  },
+  "entity": {
+    "binary_sensor": {"reading": {"name": "Reading"}},
+    "sensor": {
+      "current_book": {"name": "Current book"},
+      "progress": {"name": "Reading progress"},
+      "reading_time": {"name": "Reading time"},
+      "remaining_time": {"name": "Remaining reading time"},
+      "last_sync": {"name": "Last Kobo change"}
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "domain": "cwa_kobo_sync",
+  "name": "CWA Kobo Sync",
+  "codeowners": ["@isntfunny"],
+  "config_flow": true,
+  "documentation": "https://github.com/isntfunny/ha-cwa-kobo-sync#readme",
+  "integration_type": "service",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/isntfunny/ha-cwa-kobo-sync/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}
