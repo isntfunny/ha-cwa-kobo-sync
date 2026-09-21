@@ -96,6 +96,35 @@ async def async_get_sync(
         raise CwaKoboSyncError(f"Could not retrieve Kobo Sync data: {err}") from err
 
 
+async def async_get_metadata(
+    session: aiohttp.ClientSession, sync_url: str, entitlement_id: str
+) -> BookMetadata:
+    """Fetch metadata when a Kobo Sync delta contains only a reading state."""
+    try:
+        async with session.get(
+            f"{sync_url}/v1/library/{entitlement_id}/metadata",
+            timeout=aiohttp.ClientTimeout(total=30),
+        ) as response:
+            if response.status in {401, 403}:
+                raise CwaKoboSyncAuthError("CWA rejected the Kobo Sync link")
+            response.raise_for_status()
+            payload = await response.json(content_type=None)
+    except CwaKoboSyncError:
+        raise
+    except (aiohttp.ClientError, TimeoutError, ValueError) as err:
+        raise CwaKoboSyncError(f"Could not retrieve Kobo book metadata: {err}") from err
+
+    if not isinstance(payload, list) or not payload or not isinstance(payload[0], dict):
+        raise CwaKoboSyncError("CWA returned invalid Kobo book metadata")
+    metadata = payload[0]
+    title = metadata.get("Title")
+    if not isinstance(title, str):
+        raise CwaKoboSyncError("CWA returned Kobo book metadata without a title")
+    contributors = metadata.get("Contributors")
+    author = ", ".join(item for item in contributors if isinstance(item, str)) if isinstance(contributors, list) else None
+    return BookMetadata(title=title, author=author or None)
+
+
 def apply_sync_results(
     results: list[dict[str, Any]],
     books: dict[str, BookMetadata],

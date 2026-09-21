@@ -10,7 +10,14 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .api import BookMetadata, ReadingState, apply_sync_results, async_get_sync, current_reading
+from .api import (
+    BookMetadata,
+    ReadingState,
+    apply_sync_results,
+    async_get_metadata,
+    async_get_sync,
+    current_reading,
+)
 from .const import CONF_SYNC_URL, DEFAULT_SCAN_INTERVAL, DOMAIN, MAX_SYNC_PAGES
 
 _LOGGER = logging.getLogger(__name__)
@@ -63,6 +70,12 @@ class CwaKoboSyncCoordinator(DataUpdateCoordinator[KoboReadingData]):
 
         self._sync_token = token
         reading = current_reading(self._books, self._states)
+        if reading and reading.entitlement_id not in self._books:
+            # CWA frequently returns ChangedReadingState separately from its
+            # entitlement metadata, especially after the initial Kobo sync.
+            self._books[reading.entitlement_id] = await async_get_metadata(
+                self._session, self._sync_url, reading.entitlement_id
+            )
         return KoboReadingData(
             reading=reading,
             metadata=self._books.get(reading.entitlement_id) if reading else None,
